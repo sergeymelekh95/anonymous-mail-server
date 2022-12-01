@@ -1,9 +1,9 @@
 const http = require('http');
-// const ws = require('ws');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { Server } = require('socket.io'); // Add this
+const { Server } = require('socket.io');
+require('dotenv').config();
 
 const User = require('./models/User');
 const Msg = require('./models/Msg');
@@ -19,15 +19,19 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3000',
+        origin: 'https://anonymous-mail-api.onrender.com',
+        // origin: 'http://localhost:3000',
         methods: ['GET', 'POST'],
     },
 });
 
+const LOGIN_MONGO = process.env.LOGIN_MONGO;
+const PASSWORD_MONGO = process.env.PASSWORD_MONGO;
+
 const start = async () => {
     try {
         await mongoose.connect(
-            `mongodb+srv://sergeymelekh95:8000160q@cluster0.knua9qg.mongodb.net/anonymousChat?retryWrites=true&w=majority`
+            `mongodb+srv://${LOGIN_MONGO}:${PASSWORD_MONGO}@cluster0.knua9qg.mongodb.net/anonymousChat?retryWrites=true&w=majority`
         );
         console.log('DB connected!');
     } catch (err) {
