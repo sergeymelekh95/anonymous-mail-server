@@ -19,7 +19,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: 'https://anonymous-mail-api.onrender.com',
+        origin: 'https://anonymous-mail.onrender.com',
         // origin: 'http://localhost:3000',
         methods: ['GET', 'POST'],
     },
