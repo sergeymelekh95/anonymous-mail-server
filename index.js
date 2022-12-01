@@ -44,7 +44,6 @@ io.on('connection', (socket) => {
 
     socket.on('login', async (username, callback) => {
         let user = await User.findOne({ username });
-        const users = await User.find();
 
         if (!user) {
             user = new User({ username });
@@ -64,24 +63,26 @@ io.on('connection', (socket) => {
 
         onlinePersons.push(newOnlinePerson);
 
-        callback({ username, users, msgs: msgs.reverse() });
+        callback({ username, msgs: msgs.reverse() });
     });
 
-    socket.on('history-messages', async ({senderName, receiverName}, callback) => {
-        const msgs = await Msg.find({
-            senderName,
-            receiverName
-        });
-        
-        onlinePersons.forEach((onlinePerson) => {
-            if (onlinePerson.username === senderName) {
-                socket.emit('history', msgs);
-            }
-        })
+    socket.on(
+        'history-messages',
+        async ({ senderName, receiverName }, callback) => {
+            const msgs = await Msg.find({
+                senderName,
+                receiverName,
+            });
 
-    });
+            onlinePersons.forEach((onlinePerson) => {
+                if (onlinePerson.username === senderName) {
+                    socket.emit('history', msgs.reverse());
+                }
+            });
+        }
+    );
 
-    socket.on('message', async (message, callback) => {
+    socket.on('message', async (message) => {
         const { theme, text, receiverName, senderName } = message;
 
         const msg = new Msg({
@@ -100,18 +101,26 @@ io.on('connection', (socket) => {
             }
 
             if (receiverName === senderName) {
-            socket.emit('newMessage', msg);
-        }
+                socket.emit('newMessage', msg);
+            }
         });
     });
 
-    socket.on('disconnect', async (message, callback) => {
-        const indexOfDisconnected = onlinePersons.findIndex((onlinePerson) => onlinePerson.userId === socket.id );
+    socket.on('disconnect', async () => {
+        const indexOfDisconnected = onlinePersons.findIndex(
+            (onlinePerson) => onlinePerson.userId === socket.id
+        );
 
         onlinePersons.splice(indexOfDisconnected, 1);
 
         console.log(onlinePersons);
         console.log(socket.id, 'disconnected');
+    });
+
+    socket.on('users', async (_, callback) => {
+        const users = await User.find();
+
+        callback(users);
     })
 });
 
