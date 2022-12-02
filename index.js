@@ -99,15 +99,17 @@ io.on('connection', (socket) => {
 
         await msg.save();
 
-        onlinePersons.forEach((onlinePerson) => {
-            if (onlinePerson.username === receiverName) {
-                socket.to(onlinePerson.userId).emit('newMessage', msg);
-            }
-
+        for (let i = 0; i < onlinePersons.length; i++) {
             if (receiverName === senderName) {
                 socket.emit('newMessage', msg);
+                break;
             }
-        });
+
+            if (onlinePersons[i].username === receiverName) {
+                socket.to(onlinePersons[i].userId).emit('newMessage', msg);
+                break;
+            }
+        }
     });
 
     socket.on('disconnect', async () => {
